@@ -31,9 +31,9 @@ modelpaths =  {
 
 
 # INIT SLICES
-demographics = ['age', 'ethnic', 'gender', 'height', 'race', 'weight']
-smoking_hist = ['age_quit', 'cigar', 'cigsmok', 'pipe', 'pkyr', 'smokeage', 'smokeday', 'smokelive', 'smokework', 'smokeyr']
 feature_cols = ['n1', 'n2', 'n3', 'n4', 'n5', 'n6', 'n7', 'n8']
+demographic_cols = ['age', 'ethnic', 'gender', 'height', 'race', 'weight']
+smoking_hist = ['age_quit', 'cigar', 'cigsmok', 'pipe', 'pkyr', 'smokeage', 'smokeday', 'smokelive', 'smokework', 'smokeyr']
 llm_sent = ['llm_sentiment']
 clinical = ['biop0', 'bioplc', 'proclc', 'can_scr', 'canc_free_days']
 treatments = ['procedures', 'treament_categories', 'treatment_types', 'treatment_days']
@@ -82,30 +82,39 @@ def load_classifier(name:str):
 
 
 @st.cache_resource
-def generate_outcome(features:list, subject:str, classifier:str) -> str:
+def generate_outcome(features=[], subject='', classifier='', full_row=None) -> str:
 	global csvdata, feature_cols
 
 	row = csvdata[csvdata['Subject'] == int(subject)]
-	# newrow = features + row[demographics + smoking_hist + llm_sent].values.flatten().tolist()
-	newrow = row[feature_cols + demographics + smoking_hist + llm_sent].values.flatten().tolist()
+	# newrow = features + row[demographic_cols + smoking_hist + llm_sent].values.flatten().tolist()
+	newrow = row[feature_cols + demographic_cols + smoking_hist + llm_sent].values.flatten().tolist()
 	model = load_classifier(classifier)
 
-	# try:
-	# 	outcome = model.predict_proba([newrow])
+	if full_row is not None:
+		try:
+			outcome = model.predict_proba(full_row)
+			probability_negative = outcome[0][0] * 100
+			probability_positive = outcome[0][1] * 100
 
-	# 	if outcome[0][0] > outcome[0][1]: 
-	# 		result =  f"Subject {subject} has tested Negative with {outcome[0][0] * 100:.2f}% confidance."
-		
-	# 	else: 
-	# 		result = f"Subject {subject} has tested Positive with {outcome[0][1] * 100:.2f}% confidance."
+			if probability_negative > probability_positive:
+				result = f"""
+				✅ **Subject `{subject}` has tested _Negative_.**  
+				- **Confidence:** `{probability_negative:.2f}%`
+				"""
+			else:
+				result = f"""
+				⚠️ **Subject `{subject}` has tested _Positive_.**  
+				- **Confidence:** `{probability_positive:.2f}%`
+				"""
 
-	# 	# return(str(outcome))
+		except AttributeError:
+			outcome = model.predict(full_row)
+			result = f"""
+			🧪 **Subject `{subject}` has tested:**  
+			**{"🟢 Negative" if int(outcome[0]) == 0 else "🔴 Positive"}**
+			"""
 
-	# except AttributeError:
-	# 	outcome = model.predict([newrow])
-	# 	result = f'Subject {subject} has tested {"Positive" if int(outcome) == 1 else "Negative"}'
-
-	# return result
+		return result
 
 	try:
 		outcome = model.predict_proba([newrow])
@@ -124,7 +133,7 @@ def generate_outcome(features:list, subject:str, classifier:str) -> str:
 			"""
 
 	except AttributeError:
-		outcome = model.predict(newrow)
+		outcome = model.predict([newrow])
 		result = f"""
 		🧪 **Subject `{subject}` has tested:**  
 		**{"🟢 Negative" if int(outcome[0]) == 0 else "🔴 Positive"}**
@@ -135,38 +144,39 @@ def generate_outcome(features:list, subject:str, classifier:str) -> str:
 
 @st.cache_resource
 def generate_shap_plot(base: pd.DataFrame, subject: str):
-    np.random.seed(0)
-    model = load_classifier('XGBoost')
+	np.random.seed(0)
+	model = load_classifier('XGBoost')
 
-    features = ['n1', 'n2', 'n3', 'n4',
-                'age', 'ethnic', 'gender', 'height', 'race', 'weight',
-                'age_quit', 'cigar', 'cigsmok', 'pipe', 'pkyr', 'smokeage', 'smokeday',
-                'smokelive', 'smokework', 'smokeyr']
-    X = base[features]
-    y = base['lung_cancer']
+	features = ['n1', 'n2', 'n3', 'n4',
+				'age', 'ethnic', 'gender', 'height', 'race', 'weight',
+				'age_quit', 'cigar', 'cigsmok', 'pipe', 'pkyr', 'smokeage', 'smokeday',
+				'smokelive', 'smokework', 'smokeyr']
+	X = base[features]
+	y = base['lung_cancer']
 
-    # Fit model before SHAP calculation
-    model.fit(X, y)
-    
-    subject_index = base[base['Subject'] == int(subject)].index
-    explainer = shap.TreeExplainer(model)
-    shap_values = explainer.shap_values(X)
-    subject_shap_values = shap_values[subject_index]
+	# Fit model before SHAP calculation
+	model.fit(X, y)
+	
+	subject_index = base[base['Subject'] == int(subject)].index
+	explainer = shap.TreeExplainer(model)
+	shap_values = explainer.shap_values(X)
+	subject_shap_values = shap_values[subject_index]
 
-    plt.figure(figsize=(12, 8))
-    shap.summary_plot(shap_values, X, max_display=20, show=False)
+	plt.figure(figsize=(12, 8))
+	shap.summary_plot(shap_values, X, max_display=20, show=False)
 
-    # Get feature importance order
-    mean_abs_shap = np.abs(shap_values).mean(axis=0)
-    feature_importance_order = np.argsort(-mean_abs_shap)[:20]
-    
-    # Plot subject points
-    for i, idx in enumerate(feature_importance_order):
-        plt.scatter(subject_shap_values[0][idx], i, color='black', edgecolor='white', s=50, zorder=3)
+	# Get feature importance order
+	mean_abs_shap = np.abs(shap_values).mean(axis=0)
+	feature_importance_order = np.argsort(-mean_abs_shap)[:20]
+	
+	# Plot subject points
+	for i, idx in enumerate(feature_importance_order):
+		plt.scatter(subject_shap_values[0][idx], i, color='black', edgecolor='white', s=50, zorder=3)
 
-    plt.title("SHAP Summary Plot with Subject Highlighted")
-    plt.tight_layout()
-    return plt
+	plt.title("SHAP Summary Plot with Subject Highlighted")
+	plt.tight_layout()
+	
+	return plt
 
 
 @st.cache_resource
@@ -210,7 +220,7 @@ def doctor_page():
 	# st.write(state.subject_selection)
 	st.image(image=logo_img, use_column_width=True)
 
-	information, diagnostics, history, ai = st.tabs(['Information', 'Diagnostics', 'History', 'Talk To AI'])
+	information, images_clinical, diagnostics, ai = st.tabs(['Information', 'Images and Clinical', 'Diagnostics', 'Talk To AI'])
 
 	with information:
 		st.image(image=arch_img)
@@ -246,11 +256,32 @@ extraction with traditional classification techniques to enhance diagnostic accu
 		""".strip())
 
 
-	with diagnostics:		
+	with images_clinical:
 		uploaded_files = st.file_uploader(label='Upload Scans', accept_multiple_files=True, type=["jpg", "jpeg", "png"])
-		submit = st.button(label='Generate Fusion Model Prediction', use_container_width=True)
+		submit = st.toggle(
+			label='Generate SHAP Plot (Please upload CT Scans First)' if uploaded_files == [] \
+					else "Generate SHAP Plot", 
+			disabled=True if uploaded_files == [] else False)
 
-		if uploaded_files is not None and submit:
+		if uploaded_files != []: st.image(uploaded_files[0], use_column_width=True, caption=f'Image01_Current')
+			
+		if uploaded_files != [] and submit:
+			shap_plot = generate_shap_plot(base=csvdata, subject=state.selected_subject)
+			st.pyplot(shap_plot, use_container_width=True)
+
+
+	with diagnostics:
+		st.write(""" 
+		Comparison of current analysis with the last diagnostics in terms of
+		probability key factors that are different.
+		""".strip())
+
+		submit = st.toggle(
+			label='Generate Fusion Model Prediction (Please upload CT Scans First)' if uploaded_files == [] \
+					else "Generate Fusion Model Prediction", 
+			disabled=True if uploaded_files == [] else False)
+
+		if uploaded_files != [] and submit:
 			nameset = set()
 
 			for file in uploaded_files:
@@ -259,8 +290,6 @@ extraction with traditional classification techniques to enhance diagnostic accu
 				try:
 					image = Image.open(file).convert("RGB")
 					state.pil_images.append(image)
-					# st.write(type(image))
-					# st.write('appended')
 
 				except Exception as e:
 					st.error(f"Error processing '{file.name}': {e}")
@@ -275,92 +304,65 @@ extraction with traditional classification techniques to enhance diagnostic accu
 					outcome = generate_outcome(features, current_subject, state.model_selection)
 					# st.write(current_subject)
 					st.markdown(outcome)
-					st.image(uploaded_files[0], use_column_width=True, caption=f'Image01_{current_subject}')
+					# st.image(uploaded_files[0], use_column_width=True, caption=f'Image01_{current_subject}')
 
 		else:
 			state.selected_subject = state.subject_selection
-
-		# c1, c2, c3 = st.columns(3)
-		# data_cl, data_dm, data_sm = pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
-
-		# with c1:
-		# 	if clinical_data:
-		# 		st.write('Clinical Data')
-		# 		slice_cl = csvdata[['Subject'] + clinical]  
-		# 		data_cl = slice_cl[slice_cl['Subject'] == int(state.subject_selection)].T
-		# 		data_cl.columns = ['Value'] 
-		# 		st.dataframe(data=data_cl, use_container_width=True)
 		
-		# with c2:
-		# 	if demographic_data:
-		# 		st.write('Demographic Data')
-		# 		slice_dm = csvdata[['Subject'] + demographics]  
-		# 		data_dm = slice_dm[slice_dm['Subject'] == int(state.subject_selection)].T
-		# 		data_dm.columns = ['Value'] 
-		# 		st.dataframe(data=data_dm, use_container_width=True)
+		edited_data = {}
+		original_columns = csvdata.columns.tolist()
+		c1, c2, c3 = st.columns(3)
+	
+		original = csvdata[csvdata['Subject'] == int(state.selected_subject)]
 
-		# with c3:
-		# 	if smoking_history:
-		# 		st.write('Smoking History')
-		# 		slice_sm = csvdata[['Subject'] + smoking_hist]  
-		# 		data_sm = slice_sm[slice_sm['Subject'] == int(state.subject_selection)].T
-		# 		data_sm.columns = ['Value'] 
-		# 		st.dataframe(data=data_sm, use_container_width=True)
-		
-	edited_data = {}
-	original_columns = csvdata.columns.tolist()
-	c1, c2, c3 = st.columns(3)
+		def process_data(section_name, columns):
+			"""Handles editing and storing modified data while preserving structure."""
+			slice_df = csvdata[['Subject'] + columns]
+			data_df = slice_df[slice_df['Subject'] == int(state.subject_selection)].T
+			data_df.columns = ['Value']
 
-	def process_data(section_name, columns):
-		"""Handles editing and storing modified data while preserving structure."""
-		slice_df = csvdata[['Subject'] + columns]
-		data_df = slice_df[slice_df['Subject'] == int(state.subject_selection)].T
-		data_df.columns = ['Value']
+			# Editable dataframe
+			edited_df = st.data_editor(data_df, use_container_width=True)
 
-		# Editable dataframe
-		edited_df = st.data_editor(data_df, use_container_width=True)
+			# Store edited values while avoiding duplicate 'Subject' columns
+			edited_df = edited_df.T
+			edited_df = edited_df.drop(columns=['Subject'], errors='ignore')
+			edited_df.insert(0, 'Subject', state.subject_selection)  # Ensure 'Subject' is the first column
+			
+			edited_data[section_name] = edited_df
 
-		# Store edited values while avoiding duplicate 'Subject' columns
-		edited_df = edited_df.T
-		edited_df = edited_df.drop(columns=['Subject'], errors='ignore')
-		edited_df.insert(0, 'Subject', state.subject_selection)  # Ensure 'Subject' is the first column
-		
-		edited_data[section_name] = edited_df
+		with c1:
+			if clinical_data:
+				st.write('Clinical Data')
+				process_data('Clinical', clinical)
 
-	with c1:
-		if clinical:
-			st.write('Clinical Data')
-			process_data('Clinical', clinical)
+		with c2:
+			if demographic_data:
+				st.write('Demographic Data')
+				process_data('Demographic', demographic_cols)
 
-	with c2:
-		if demographics:
-			st.write('Demographic Data')
-			process_data('Demographic', demographics)
+		with c3:
+			if smoking_history:
+				st.write('Smoking History')
+				process_data('Smoking History', smoking_hist)
 
-	with c3:
-		if smoking_hist:
-			st.write('Smoking History')
-			process_data('Smoking History', smoking_hist)
+		if edited_data:
+			final_edited_df = pd.concat(edited_data.values(), axis=1)
 
-	# Combine all edited data while preventing duplicate columns
-	if edited_data:
-		final_edited_df = pd.concat(edited_data.values(), axis=1)
+			# Remove duplicate columns (keeping the first occurrence)
+			final_edited_df = final_edited_df.loc[:, ~final_edited_df.columns.duplicated()]
+			final_edited_df = final_edited_df.reindex(columns=original_columns, fill_value=None)
+			final_edited_df = final_edited_df.fillna(original.set_index('Subject').loc[state.selected_subject])
 
-		# Remove duplicate columns (keeping the first occurrence)
-		final_edited_df = final_edited_df.loc[:, ~final_edited_df.columns.duplicated()]
+			# st.write("Edited Data (Preserved Column Order, No Missing Values):")
+			# st.dataframe(final_edited_df)
 
-		# **Reorder columns to match the original dataset**
-		final_edited_df = final_edited_df.reindex(columns=original_columns, fill_value=None)
+			new_pred = st.toggle('Generate New Prediction')
+			if new_pred:
+				new_X = final_edited_df[feature_cols + demographic_cols + smoking_hist + llm_sent]
+				new_results = generate_outcome(subject=state.selected_subject, classifier=state.model_selection, full_row=new_X)
+				st.markdown(new_results)
 
-		st.write("Edited Data (Preserved Column Order):")
-		st.dataframe(final_edited_df)
-
-
-	with history:
-		st.write(""" 
-		Comparison of current analysis with the last diagnostics in terms of
-		probability key factors that are different.
-		""".strip())
 
 
 	with ai:
@@ -368,7 +370,7 @@ extraction with traditional classification techniques to enhance diagnostic accu
 You are an intelligent AI mdeical assistant.
 Refer to the patient data given below (patient is referred to as "Subject"). It is related to a lung cancer study.
 					   
-{llmdata[llmdata['Subject'] == int(state.subject_selection)][demographics + smoking_hist + clinical + llm_sent + ['lung_cancer']].to_dict(orient='records')}
+{llmdata[llmdata['Subject'] == int(state.subject_selection)][demographic_cols + smoking_hist + clinical + llm_sent + ['lung_cancer']].to_dict(orient='records')}
 
 Some fields that do have a clear description are described below - 
 bioplc - Had a biopsy related to lung cancer?
@@ -453,7 +455,7 @@ def patient_page(patient_id:str):
 			with col1:
 				st.write('Demographic History')
 				row_dm = csvdata[csvdata['Subject'] == int(state.subject)]
-				slice_dm = row_dm[demographics].T  
+				slice_dm = row_dm[demographic_cols].T  
 				slice_dm.columns = ['Data'] 
 				st.dataframe(data=slice_dm, use_container_width=True)
 
@@ -471,7 +473,7 @@ def patient_page(patient_id:str):
 You are a helpful AI doctor.
 Your task is to respond to the patient's queries to the best of your knowledge.
 Refer to patient info given below.
-{llmdata[llmdata['Subject'] == int(patient_id)][demographics + smoking_hist + clinical + llm_sent + treatments + ['lung_cancer']].to_dict(orient='records')}
+{llmdata[llmdata['Subject'] == int(patient_id)][demographic_cols + smoking_hist + clinical + llm_sent + treatments + ['lung_cancer']].to_dict(orient='records')}
 
 					  '''.strip())
 
