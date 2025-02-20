@@ -16,17 +16,30 @@ import warnings
 warnings.simplefilter('ignore')
 
 # INIT PATHS
-train_csv = r'data\all_features_combined_new.csv'
-val_csv = r'data\all_validation_features_combined.csv'
-logo_img = r'images\logo.png'
-arch_img = r'images\architecture.png'
+# train_csv = r'data\all_features_combined_new.csv'
+# val_csv = r'data\all_validation_features_combined.csv'
+# logo_img = r'images\logo.png'
+# arch_img = r'images\architecture.png'
 
-modelpaths =  {
-	"Logistic Regression":r'classifiers\FusionModel LR_97.41.pkl',
-	"KNN":r'classifiers\FusionModel KNN_73.28.pkl',
-	"Naive Bayes":r'classifiers\FusionModel NB_78.45.pkl',
-	"Random Forest":r'classifiers\FusionModel RFC_91.38.pkl',
-	"XGBoost":r'classifiers\FusionModel XGB_92.24.pkl'
+train_csv = os.path.join('data', 'all_features_combined_new.csv')
+val_csv = os.path.join('data', 'all_validation_features_combined.csv')
+logo_img = os.path.join('images', 'logo.png')
+arch_img = os.path.join('images', 'architecture.png')
+
+# modelpaths =  {
+# 	"Logistic Regression":r'classifiers\FusionModel LR_97.41.pkl',
+# 	"KNN":r'classifiers\FusionModel KNN_73.28.pkl',
+# 	"Naive Bayes":r'classifiers\FusionModel NB_78.45.pkl',
+# 	"Random Forest":r'classifiers\FusionModel RFC_91.38.pkl',
+# 	"XGBoost":r'classifiers\FusionModel XGB_92.24.pkl'
+# }
+
+modelpaths = {
+    "Logistic Regression": os.path.join('classifiers', 'FusionModel LR_97.41.pkl'),
+    "KNN": os.path.join('classifiers', 'FusionModel KNN_73.28.pkl'),
+    "Naive Bayes": os.path.join('classifiers', 'FusionModel NB_78.45.pkl'),
+    "Random Forest": os.path.join('classifiers', 'FusionModel RFC_91.38.pkl'),
+    "XGBoost": os.path.join('classifiers', 'FusionModel XGB_92.24.pkl')
 }
 
 
@@ -60,7 +73,8 @@ def utilloader(utility:str):
 		# device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 		device = torch.device('cpu')
 		VGG_16 = LungCancerVGG16Fusion().to(device)
-		VGG_16.load_state_dict(torch.load(r'models\best_vgg16.pth', weights_only=True))
+		modelpath = os.path.join("models", "best_vgg16.pth")
+		VGG_16.load_state_dict(torch.load(modelpath, weights_only=True))
 		VGG_16.eval()
 
 		return DataManager(VGG_16)
@@ -70,10 +84,10 @@ def utilloader(utility:str):
 		return list(data['Subject'])
 
 	if utility == 'classifier_csv':
-		return pd.read_csv(r'data\all_combined.csv')
+		return pd.read_csv(os.path.join("data", "all_combined.csv")) 
 	
 	if utility == 'llm_csv':
-		return pd.read_csv(r'data\all_combined_descriptive.csv')
+		return pd.read_csv(os.path.join("data", "all_combined_descriptive.csv"))
 
 
 @st.cache_resource
