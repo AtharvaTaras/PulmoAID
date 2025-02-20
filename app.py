@@ -53,7 +53,7 @@ st.set_page_config(page_title='PulmoAID',
 @st.cache_resource
 def utilloader(utility:str):
 	if utility == 'llm':
-		return LLM('AIzaSyAaD63dAdE26TCXOMzmyGzAIj6W1IEZMOU')
+		return LLM(st.secrets["api"])
 	
 	if utility == 'manager':
 		torch.manual_seed(0)
@@ -217,7 +217,6 @@ def doctor_page():
 		patient_obs = st.button(label='Patient\'s Observations', use_container_width=True)
 		doctor_notes = st.text_area(label='Doctor\'s Notes')
 
-	# st.write(state.subject_selection)
 	st.image(image=logo_img, use_column_width=True)
 
 	information, images_clinical, diagnostics, ai = st.tabs(['Information', 'Images and Clinical', 'Diagnostics', 'Talk To AI'])
@@ -225,7 +224,7 @@ def doctor_page():
 	with information:
 		st.image(image=arch_img)
 		# st.markdown("![Alt Text](https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExeTZybHlnNjl2aGFtaTZlNjN2ejk4ZHl3bGxmdDRvbWcyOTVjY2F1MSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/WtUK5I9TbWiRcGrVZh/giphy.gif)")
-		st.markdown("![Alt Text](https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExbGZmc2Z2d2pwM25pODlodXpzem0weXBzeXVxMjdiOG9yYnRmbWRmNyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/h8j1vnUMElormqm8E8/giphy.gif)")
+		# st.markdown("![Alt Text](https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExbGZmc2Z2d2pwM25pODlodXpzem0weXBzeXVxMjdiOG9yYnRmbWRmNyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/h8j1vnUMElormqm8E8/giphy.gif)")
 
 		st.write(""" 
 		PulmoAID -  Enabling AI-based diagnostics for lung cancer using advanced multimodal feature fusion approach.
@@ -302,7 +301,6 @@ extraction with traditional classification techniques to enhance diagnostic accu
 				with st.spinner(text='Running Model...'):
 					features = Manager.extract_features(imagelist=state.pil_images)
 					outcome = generate_outcome(features, current_subject, state.model_selection)
-					# st.write(current_subject)
 					st.markdown(outcome)
 					# st.image(uploaded_files[0], use_column_width=True, caption=f'Image01_{current_subject}')
 
@@ -517,7 +515,7 @@ def main():
 				state.user = "Patient"
 		
 		if username and password and state.user:
-			if state.user == "Doctor" and username == 'Atharva' and password == '123':
+			if state.user == "Doctor" and username == st.secrets["username"] and password == st.secrets["password"]:
 				state.login = True
 				state.user = "Doctor"
 				# st.rerun()
@@ -525,7 +523,7 @@ def main():
 			elif state.user == "Patient" and username.strip().isnumeric():
 				tmp = int(username.strip())
 				
-				if tmp in state.subject_list and password == '123':
+				if tmp in state.subject_list and password == st.secrets["password"]:
 					state.login = True
 					state.subject = username.strip()
 					# st.rerun()
@@ -552,8 +550,8 @@ if __name__ == "__main__":
 	Manager = utilloader('manager')
 
 	state.subject_list = list(csvdata['Subject'])
-	state.login = True
-	state.user = 'Doctor'
+	# state.login = True
+	# state.user = 'Doctor'
 	# patient_page('100158')
 	
 	main()

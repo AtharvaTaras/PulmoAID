@@ -1,5 +1,6 @@
 # LLM
 import google.generativeai as genai
+import streamlit as st
 from time import time, sleep
 import joblib
 
@@ -16,7 +17,7 @@ import warnings
 warnings.simplefilter('ignore')
 
 
-API = "AIzaSyAaD63dAdE26TCXOMzmyGzAIj6W1IEZMOU"
+API = st.secrets["api"]
 genai.configure(api_key=API)
 
 CLASSIFIER  = joblib.load(r"A:\Software Projects\NLST-Dataset\saved_models\sklearn_classifier_2.joblib")
