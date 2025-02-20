@@ -53,7 +53,11 @@ st.set_page_config(page_title='PulmoAID',
 @st.cache_resource
 def utilloader(utility:str):
 	if utility == 'llm':
+<<<<<<< HEAD
 		return LLM(st.secrets["keys"]["api"])
+=======
+		return LLM(st.secrets["api"])
+>>>>>>> a87d393e9e47e455e1f48e7127a475a8157d69bc
 	
 	if utility == 'manager':
 		torch.manual_seed(0)
@@ -515,7 +519,11 @@ def main():
 				state.user = "Patient"
 		
 		if username and password and state.user:
+<<<<<<< HEAD
 			if state.user == "Doctor" and username == st.secrets["keys"]["username"] and password == st.secrets["keys"]["password"]:
+=======
+			if state.user == "Doctor" and username == st.secrets["username"] and password == st.secrets["password"]:
+>>>>>>> a87d393e9e47e455e1f48e7127a475a8157d69bc
 				state.login = True
 				state.user = "Doctor"
 				# st.rerun()
@@ -523,7 +531,11 @@ def main():
 			elif state.user == "Patient" and username.strip().isnumeric():
 				tmp = int(username.strip())
 				
+<<<<<<< HEAD
 				if tmp in state.subject_list and password == st.secrets["keys"]["password"]:
+=======
+				if tmp in state.subject_list and password == st.secrets["password"]:
+>>>>>>> a87d393e9e47e455e1f48e7127a475a8157d69bc
 					state.login = True
 					state.subject = username.strip()
 					# st.rerun()
