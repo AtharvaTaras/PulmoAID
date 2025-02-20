@@ -21,8 +21,8 @@ warnings.simplefilter('ignore')
 # logo_img = r'images\logo.png'
 # arch_img = r'images\architecture.png'
 
-train_csv = os.path.join('data', 'all_features_combined_new.csv')
-val_csv = os.path.join('data', 'all_validation_features_combined.csv')
+train_csv = os.path.join('data', 'selected_data.csv')
+val_csv = os.path.join('data', 'selected_data.csv')
 logo_img = os.path.join('images', 'logo.png')
 arch_img = os.path.join('images', 'architecture.png')
 
@@ -83,10 +83,10 @@ def utilloader(utility:str):
 		return list(data['Subject'])
 
 	if utility == 'classifier_csv':
-		return pd.read_csv(os.path.join("data", "all_combined.csv")) 
+		return pd.read_csv(os.path.join("data", "selected_data.csv")) 
 	
 	if utility == 'llm_csv':
-		return pd.read_csv(os.path.join("data", "all_combined_descriptive.csv"))
+		return pd.read_csv(os.path.join("data", "selected_descriptive_data.csv"))
 
 
 @st.cache_resource
@@ -459,6 +459,8 @@ def patient_page(patient_id:str):
 	state.subject = patient_id
 	csv_row = csvdata[csvdata['Subject'] == int(patient_id)]
 	llm_row = llmdata[llmdata['Subject'] == int(patient_id)]
+
+	st.image(image=logo_img, use_container_width=True)
 
 	with st.sidebar:
 		st.header(body='Patient Portal')
