@@ -70,11 +70,10 @@ def utilloader(utility:str):
 	
 	if utility == 'manager':
 		torch.manual_seed(0)
-		# device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 		device = torch.device('cpu')
 		VGG_16 = LungCancerVGG16Fusion().to(device)
 		modelpath = os.path.join("models", "best_vgg16.pth")
-		VGG_16.load_state_dict(torch.load(modelpath, weights_only=True))
+		VGG_16.load_state_dict(torch.load(modelpath, weights_only=True, map_location=device))
 		VGG_16.eval()
 
 		return DataManager(VGG_16)
