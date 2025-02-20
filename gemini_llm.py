@@ -20,8 +20,8 @@ warnings.simplefilter('ignore')
 API = st.secrets["keys"]["api"]
 genai.configure(api_key=API)
 
-CLASSIFIER  = joblib.load(r"classifiers\FusionModel LR_97.41.pkl")
-CLINICAL_DATA = pd.read_csv(r"data\all_features_combined_new.csv")
+CLASSIFIER  = joblib.load(os.path.join("classifiers", "FusionModel LR_97.41.pkl"))
+CLINICAL_DATA = pd.read_csv(os.path.join("data", "all_features_combined_new.csv"))
 
 
 # Load VGG Model
