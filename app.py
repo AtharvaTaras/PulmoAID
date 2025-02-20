@@ -230,7 +230,7 @@ def doctor_page():
 		patient_obs = st.button(label='Patient\'s Observations', use_container_width=True)
 		doctor_notes = st.text_area(label='Doctor\'s Notes')
 
-	st.image(image=logo_img, use_column_width=True)
+	st.image(image=logo_img, use_container_width=True)
 
 	information, images_clinical, diagnostics, ai = st.tabs(['Information', 'Images and Clinical', 'Diagnostics', 'Talk To AI'])
 
@@ -275,7 +275,7 @@ extraction with traditional classification techniques to enhance diagnostic accu
 					else "Generate SHAP Plot", 
 			disabled=True if uploaded_files == [] else False)
 
-		if uploaded_files != []: st.image(uploaded_files[0], use_column_width=True, caption=f'Image01_Current')
+		if uploaded_files != []: st.image(uploaded_files[0], use_container_width=True, caption=f'Image01_Current')
 			
 		if uploaded_files != [] and submit:
 			shap_plot = generate_shap_plot(base=csvdata, subject=state.selected_subject)
@@ -315,7 +315,7 @@ extraction with traditional classification techniques to enhance diagnostic accu
 					features = Manager.extract_features(imagelist=state.pil_images)
 					outcome = generate_outcome(features, current_subject, state.model_selection)
 					st.markdown(outcome)
-					# st.image(uploaded_files[0], use_column_width=True, caption=f'Image01_{current_subject}')
+					# st.image(uploaded_files[0], use_container_width=True, caption=f'Image01_{current_subject}')
 
 		else:
 			state.selected_subject = state.subject_selection
@@ -546,7 +546,7 @@ def main():
 		state.user = None
 	
 	if not state.login:
-		st.image(image=logo_img, use_column_width=True)
+		st.image(image=logo_img, use_container_width=True)
 		st.title('Login')
 		
 		username = st.text_input(label='Username/Patient ID')
