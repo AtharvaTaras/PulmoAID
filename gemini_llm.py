@@ -470,6 +470,7 @@ class DataManager():
 
 
 if __name__ == "__main__":
+	pass
 	# VGG_16 = LungCancerVGG16Fusion().to(device)
 	# print('Init Model')
 	# VGG_16.load_state_dict(torch.load(r'A:\Software Projects\NLST-App\checkpoints\best_vgg16.pth', weights_only=True))
