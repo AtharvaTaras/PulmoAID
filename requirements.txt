@@ -11,3 +11,4 @@ seaborn
 joblib
 pillow
 scikit-learn
+shap
