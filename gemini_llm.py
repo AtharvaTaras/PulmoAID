@@ -37,16 +37,16 @@ transform = transforms.Compose([
 ])
 
 
-def classifier_loader(model_name:str):
-	models =  {
-		"Logistic Regression":r'A:\Software Projects\NLST-App\free_text\classifiers\FusionModel LR_97.41.pkl',
-		"KNN":r'A:\Software Projects\NLST-App\free_text\classifiers\FusionModel KNN_73.28.pkl',
-		"Naive Bayes":r'A:\Software Projects\NLST-App\free_text\classifiers\FusionModel NB_78.45.pkl',
-		"Random Forest":r'A:\Software Projects\NLST-App\free_text\classifiers\FusionModel RFC_91.38.pkl',
-		"XGBosst":r'A:\Software Projects\NLST-App\free_text\classifiers\FusionModel XGB_92.24.pkl'
-	}
+# def classifier_loader(model_name:str):
+# 	models =  {
+# 		"Logistic Regression":r'A:\Software Projects\NLST-App\free_text\classifiers\FusionModel LR_97.41.pkl',
+# 		"KNN":r'A:\Software Projects\NLST-App\free_text\classifiers\FusionModel KNN_73.28.pkl',
+# 		"Naive Bayes":r'A:\Software Projects\NLST-App\free_text\classifiers\FusionModel NB_78.45.pkl',
+# 		"Random Forest":r'A:\Software Projects\NLST-App\free_text\classifiers\FusionModel RFC_91.38.pkl',
+# 		"XGBosst":r'A:\Software Projects\NLST-App\free_text\classifiers\FusionModel XGB_92.24.pkl'
+# 	}
 
-	return joblib.load(models[model_name])
+# 	return joblib.load(models[model_name])
 
 
 class LungCancerVGG16Fusion(nn.Module):
@@ -375,7 +375,7 @@ def get_fusion_features_simple(model, input_tensor):
 
 
 class DataManager():
-	def __init__(self, vgg_model, imagedir='', csvfile=r'A:\Software Projects\NLST-App\free_text\all_features_combined_new.csv'):
+	def __init__(self, vgg_model, imagedir='', csvfile=r'data\all_features_combined_new.csv'):
 		self.vgg = vgg_model
 		self.df = pd.read_csv(csvfile)
 		self.imagedir = imagedir
@@ -489,6 +489,6 @@ if __name__ == "__main__":
 	# manager.set_subject(100158)
 	# print(manager.predict(classifier))
 
-	gemini = LLM(api_key=API)
-	print(gemini.ask('Hello'))
-	print(gemini.ask('Tell me more about yourself'))
+	# gemini = LLM(api_key=API)
+	# print(gemini.ask('Hello'))
+	# print(gemini.ask('Tell me more about yourself'))

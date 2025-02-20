@@ -60,7 +60,7 @@ def utilloader(utility:str):
 		# device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 		device = torch.device('cpu')
 		VGG_16 = LungCancerVGG16Fusion().to(device)
-		VGG_16.load_state_dict(torch.load(r'A:\Software Projects\NLST-App\checkpoints\best_vgg16.pth', weights_only=True))
+		VGG_16.load_state_dict(torch.load(r'models\best_vgg16.pth', weights_only=True))
 		VGG_16.eval()
 
 		return DataManager(VGG_16)
