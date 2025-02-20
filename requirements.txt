@@ -12,3 +12,4 @@ joblib
 pillow
 scikit-learn
 shap
+xgboost

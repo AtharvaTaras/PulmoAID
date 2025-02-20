@@ -571,7 +571,7 @@ def main():
 			elif state.user == "Patient" and username.strip().isnumeric():
 				tmp = int(username.strip())
 				
-				if tmp in state.subject_list and password == st.secrets["password"]:
+				if tmp in state.subject_list and password == st.secrets["keys"]["password"]:
 					state.login = True
 					state.subject = username.strip()
 					# st.rerun()
