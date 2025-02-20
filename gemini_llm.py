@@ -27,7 +27,6 @@ CLINICAL_DATA = pd.read_csv(os.path.join("data", "all_features_combined_new.csv"
 # Load VGG Model
 
 torch.manual_seed(0)
-# device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 device = torch.device('cpu')
 
 transform = transforms.Compose([
@@ -305,7 +304,6 @@ SYS PROMPT {self.sys_prompt}
 ''')
 	
 def file_to_tensor(path:str):
-	# device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 	device = torch.device('cpu')
 
 	if path.lower().endswith('.dcm'):
@@ -375,7 +373,7 @@ def get_fusion_features_simple(model, input_tensor):
 
 
 class DataManager():
-	def __init__(self, vgg_model, imagedir='', csvfile=r'data\all_features_combined_new.csv'):
+	def __init__(self, vgg_model, imagedir='', csvfile=os.path.join("data", "all_features_combined_new.csv")):
 		self.vgg = vgg_model
 		self.df = pd.read_csv(csvfile)
 		self.imagedir = imagedir

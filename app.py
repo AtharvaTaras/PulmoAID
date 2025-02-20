@@ -192,17 +192,17 @@ def generate_shap_plot(base: pd.DataFrame, subject: str):
 	return plt
 
 
-@st.cache_resource
-def load_image(subject:str):
-	path = r"A:\Software Projects\NLST-Dataset\images_all"
-	imagepaths = []
+# @st.cache_resource
+# def load_image(subject:str):
+# 	path = r"A:\Software Projects\NLST-Dataset\images_all"
+# 	imagepaths = []
 
-	for root, _, files in os.walk(path):
-		for file in files:
-			if subject in files:
-				imagepaths.append(os.path.join(root, file))
+# 	for root, _, files in os.walk(path):
+# 		for file in files:
+# 			if subject in files:
+# 				imagepaths.append(os.path.join(root, file))
 
-	return imagepaths[8:8+16]
+# 	return imagepaths[8:8+16]
 
 
 def doctor_page():
