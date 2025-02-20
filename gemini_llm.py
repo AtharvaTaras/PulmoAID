@@ -17,11 +17,7 @@ import warnings
 warnings.simplefilter('ignore')
 
 
-<<<<<<< HEAD
 API = st.secrets["keys"]["api"]
-=======
-API = st.secrets["api"]
->>>>>>> a87d393e9e47e455e1f48e7127a475a8157d69bc
 genai.configure(api_key=API)
 
 CLASSIFIER  = joblib.load(r"A:\Software Projects\NLST-Dataset\saved_models\sklearn_classifier_2.joblib")
@@ -39,7 +35,6 @@ transform = transforms.Compose([
 	transforms.ToTensor(),
 	transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 ])
-
 
 
 def classifier_loader(model_name:str):

@@ -53,11 +53,7 @@ st.set_page_config(page_title='PulmoAID',
 @st.cache_resource
 def utilloader(utility:str):
 	if utility == 'llm':
-<<<<<<< HEAD
 		return LLM(st.secrets["keys"]["api"])
-=======
-		return LLM(st.secrets["api"])
->>>>>>> a87d393e9e47e455e1f48e7127a475a8157d69bc
 	
 	if utility == 'manager':
 		torch.manual_seed(0)
@@ -391,10 +387,6 @@ If any question is unrelated to lung cancer or the medical field in general, res
 
 		if "chat_history" not in state: state.chat_history = []
 
-		for message in state.chat_history:
-			with st.chat_message(message["role"]):
-				st.markdown(message["content"])
-
 		sample_text = random.choice([
 					"Summarize this patient for me...",
 					"Tell me more about this subject...",
@@ -407,7 +399,46 @@ If any question is unrelated to lung cancer or the medical field in general, res
 			state.chat_history.append({"role":"User", "content":user_input})
 			response = state.llm.ask(user_input)
 			state.chat_history.append({"role":"AI", "content":response})
+			# st.rerun()
+
+		for message in state.chat_history:
+			with st.chat_message(message["role"]):
+				st.markdown(message["content"])
+
+		# Display all existing messages
+		
+		# for message in state.chat_history:
+		# 	with st.chat_message(message["role"]):
+		# 		st.markdown(message["content"])
+
+		# # Set up placeholder for new responses
+		# response_placeholder = st.empty()
+
+		# # Sample placeholder texts
+		# sample_text = random.choice([
+		# 	"Summarize this patient for me...",
+		# 	"Tell me more about this subject...",
+		# 	"Explain this patient's smoking history in detail..."
+		# ])
+
+		# user_input = st.chat_input(placeholder=sample_text)
+
+		# # Process new input
+		# if user_input:
+		# 	# Add and display user message immediately
+		# 	state.chat_history.append({"role": "User", "content": user_input})
+		# 	with st.chat_message("User"):
+		# 		st.markdown(user_input)
 			
+		# 	# Generate and display AI response
+		# 	with st.chat_message("AI"):
+		# 		with st.spinner("Thinking..."):
+		# 			response = state.llm.ask(user_input)
+		# 			st.markdown(response)
+			
+		# 	# Add AI response to history
+		# 	state.chat_history.append({"role": "AI", "content": response})
+
 
 def patient_page(patient_id:str):
 	global csvdata, llmdata
@@ -519,11 +550,7 @@ def main():
 				state.user = "Patient"
 		
 		if username and password and state.user:
-<<<<<<< HEAD
 			if state.user == "Doctor" and username == st.secrets["keys"]["username"] and password == st.secrets["keys"]["password"]:
-=======
-			if state.user == "Doctor" and username == st.secrets["username"] and password == st.secrets["password"]:
->>>>>>> a87d393e9e47e455e1f48e7127a475a8157d69bc
 				state.login = True
 				state.user = "Doctor"
 				# st.rerun()
@@ -531,11 +558,7 @@ def main():
 			elif state.user == "Patient" and username.strip().isnumeric():
 				tmp = int(username.strip())
 				
-<<<<<<< HEAD
-				if tmp in state.subject_list and password == st.secrets["keys"]["password"]:
-=======
 				if tmp in state.subject_list and password == st.secrets["password"]:
->>>>>>> a87d393e9e47e455e1f48e7127a475a8157d69bc
 					state.login = True
 					state.subject = username.strip()
 					# st.rerun()
