@@ -44,6 +44,7 @@ if 'login' not in st.session_state: st.session_state.login = False
 if 'scans' not in st.session_state: st.session_state.scans = []
 if 'pil_images' not in st.session_state: st.session_state.pil_images = []
 if 'subject' not in st.session_state: st.session_state.subject = 'N/A'
+if 'user' not in st.session_state: st.session_state.user = None
 
 st.set_page_config(page_title='PulmoAID', 
 				   layout=st.session_state.layout,
@@ -246,19 +247,6 @@ def generate_shap_plot(base: pd.DataFrame, subject: str):
 	return image
 
 
-# @st.cache_resource
-# def load_image(subject:str):
-# 	path = r"A:\Software Projects\NLST-Dataset\images_all"
-# 	imagepaths = []
-
-# 	for root, _, files in os.walk(path):
-# 		for file in files:
-# 			if subject in files:
-# 				imagepaths.append(os.path.join(root, file))
-
-# 	return imagepaths[8:8+16]
-
-
 def doctor_page():
 	global csvdata, llmdata
 	
@@ -271,7 +259,7 @@ def doctor_page():
 		logout = st.button(label='Logout', use_container_width=True)
 		if logout:
 			st.session_state.login = False
-			st.session_state.layout = 'centered'
+			st.session_state.messages = []
 			st.rerun()
 
 		st.session_state.subject_selection = st.selectbox(label='Patient ID', options=st.session_state.subject_list)
@@ -427,7 +415,6 @@ def doctor_page():
 		save = st.button('Save/Update Notes', use_container_width=True)
 
 
-
 	with ai:
 
 		if 'llm' not in st.session_state:
@@ -490,14 +477,14 @@ def patient_page(patient_id:str):
 		logout = st.button(label='Logout', use_container_width=True)
 
 		if logout:
-			st.session_state.chat_history = []
+			st.session_state.messages = []
 			st.session_state.login = False
 			st.rerun()
 
 	st.title('Patient Dashboard')
 	st.divider()
 
-	info, diagnostics, history, ai = st.tabs(['Information', 'Diagnostics', 'My History', 'Talk To VDoctor'])
+	info, diagnostics, history, ai = st.tabs(['Information', 'My Diagnostics', 'My History', 'Talk To VDoctor'])
 
 	with info:
 		info_tab()
@@ -532,7 +519,6 @@ def patient_page(patient_id:str):
 				st.dataframe(data=slice_sm, use_container_width=True)
 
 
-
 	with ai:
 		if 'llm' not in st.session_state:
 			st.session_state.llm = load_llm()
@@ -565,12 +551,6 @@ If any patient tested negative (lung_cancer == 0), that means they do no need an
 
 
 def main():
-	
-	if 'login' not in st.session_state:
-		st.session_state.login = False
-	if 'user' not in st.session_state:
-		st.session_state.user = None
-	
 	if not st.session_state.login:
 		st.image(image=logo_img, use_container_width=True)
 		st.title('Login')
@@ -608,12 +588,9 @@ def main():
 				st.error("Invalid credentials or user type selection!")
 	
 	elif st.session_state.login and st.session_state.user == "Doctor":
-		if 'chat_history' not in st.session_state: st.session_state.chat_history = []
 		doctor_page()
 	
 	elif st.session_state.login and st.session_state.user == "Patient":
-		if 'chat_history' not in st.session_state: st.session_state.chat_history = []
-		# st.session_state.scans = load_image(str(st.session_state.subject))
 		patient_page(st.session_state.subject)
 
 
