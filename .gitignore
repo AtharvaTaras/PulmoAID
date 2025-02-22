@@ -4,6 +4,10 @@ __pycache__/
 # Notebooks
 *.ipynb
 
+# Other
+app2.py 
+ui_test.py
+
 # Pytorch
 # *.pth
 
