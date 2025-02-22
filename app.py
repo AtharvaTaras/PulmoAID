@@ -553,11 +553,10 @@ If any patient tested negative (lung_cancer == 0), that means they do no need an
 def main():
 	if not st.session_state.login:
 		st.image(image=logo_img, use_container_width=True)
-		st.title('Login')
+		st.title('PulmoAID Login')
 		
 		username = st.text_input(label='Username/Patient ID')
 		password = st.text_input(label='Password', type='password')
-		
 		col1, col2 = st.columns(2)
 		
 		with col1:
